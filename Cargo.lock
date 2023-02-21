@@ -249,6 +249,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
+name = "backend-common"
+version = "0.1.0"
+dependencies = [
+ "rustc-hash",
+ "serde",
+ "vir",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1771,6 +1780,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "native-verifier"
+version = "0.1.0"
+dependencies = [
+ "backend-common",
+ "error-chain",
+ "lazy_static",
+ "log",
+ "prusti-common",
+ "prusti-utils",
+ "regex",
+ "serde",
+ "uuid",
+ "vir",
+]
+
+[[package]]
 name = "nix"
 version = "0.25.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2120,6 +2145,7 @@ dependencies = [
 name = "prusti-common"
 version = "0.1.0"
 dependencies = [
+ "backend-common",
  "config",
  "itertools",
  "lazy_static",
@@ -2179,11 +2205,13 @@ version = "0.1.0"
 name = "prusti-server"
 version = "0.1.0"
 dependencies = [
+ "backend-common",
  "bincode",
  "clap",
  "env_logger",
  "lazy_static",
  "log",
+ "native-verifier",
  "num_cpus",
  "once_cell",
  "prusti-common",
@@ -2254,6 +2282,7 @@ dependencies = [
 name = "prusti-viper"
 version = "0.1.0"
 dependencies = [
+ "backend-common",
  "backtrace",
  "derive_more",
  "diffy",
@@ -3428,6 +3457,7 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 name = "viper"
 version = "0.1.0"
 dependencies = [
+ "backend-common",
  "bencher",
  "bincode",
  "env_logger",
@@ -3436,6 +3466,7 @@ dependencies = [
  "jni",
  "lazy_static",
  "log",
+ "prusti-utils",
  "rustc-hash",
  "serde",
  "smt-log-analyzer",
