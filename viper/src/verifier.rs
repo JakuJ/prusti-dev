@@ -52,6 +52,7 @@ impl<'a> Verifier<'a> {
                 VerificationBackend::Carbon => {
                     carbon::CarbonVerifier::with(env).new(reporter, debug_info)
                 }
+                other => unreachable!("{:?} is not a Viper backend", other),
             }
         }));
 
