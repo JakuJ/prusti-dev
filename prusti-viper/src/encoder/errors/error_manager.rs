@@ -6,6 +6,7 @@
 
 use super::PositionManager;
 use backend_common::VerificationError;
+use core::fmt::Debug;
 use log::debug;
 use prusti_interface::{data::ProcedureDefId, PrustiError};
 use prusti_rustc_interface::{errors::MultiSpan, span::source_map::SourceMap};
@@ -208,7 +209,11 @@ impl<'tcx> ErrorManager<'tcx> {
     }
 
     /// Register a new VIR position.
-    pub fn register_span<T: Into<MultiSpan> + Debug>(&mut self, def_id: ProcedureDefId, span: T) -> Position {
+    pub fn register_span<T: Into<MultiSpan> + Debug>(
+        &mut self,
+        def_id: ProcedureDefId,
+        span: T,
+    ) -> Position {
         self.position_manager.register_span(def_id, span)
     }
 
@@ -220,7 +225,11 @@ impl<'tcx> ErrorManager<'tcx> {
     /// Register the ErrorCtxt on an existing VIR position.
     #[tracing::instrument(level = "trace", skip(self))]
     pub fn set_error(&mut self, pos: Position, error_ctxt: ErrorCtxt) {
-        assert_ne!(pos, Position::default(), "Trying to register an error on a default position");
+        assert_ne!(
+            pos,
+            Position::default(),
+            "Trying to register an error on a default position"
+        );
         if let Some(existing_error_ctxt) = self.error_contexts.get(&pos.id()) {
             debug_assert_eq!(
                 existing_error_ctxt,
@@ -253,7 +262,12 @@ impl<'tcx> ErrorManager<'tcx> {
 
     /// Register a new VIR position with the given ErrorCtxt.
     /// Equivalent to calling `set_error` on the output of `register_span`.
-    pub fn register_error<T: Into<MultiSpan> + Debug>(&mut self, span: T, error_ctxt: ErrorCtxt, def_id: ProcedureDefId) -> Position {
+    pub fn register_error<T: Into<MultiSpan> + Debug>(
+        &mut self,
+        span: T,
+        error_ctxt: ErrorCtxt,
+        def_id: ProcedureDefId,
+    ) -> Position {
         let pos = self.register_span(def_id, span);
         self.set_error(pos, error_ctxt);
         pos
