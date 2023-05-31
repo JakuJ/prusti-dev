@@ -6,6 +6,7 @@ use crate::common::display;
 #[derive(derive_more::From, derive_more::IsVariant)]
 pub enum Statement {
     Comment(Comment),
+    Label(Label),
     LogEvent(LogEvent),
     Assume(Assume),
     Assert(Assert),
@@ -17,6 +18,7 @@ pub enum Statement {
     MethodCall(MethodCall),
     Assign(Assign),
     Conditional(Conditional),
+    MaterializePredicate(MaterializePredicate),
 }
 
 #[display(fmt = "// {}", comment)]
@@ -24,10 +26,17 @@ pub struct Comment {
     pub comment: String,
 }
 
+#[display(fmt = "label {}", label)]
+pub struct Label {
+    pub label: String,
+    pub position: Position,
+}
+
 #[display(fmt = "log-event {}", expression)]
 /// Log an event by assuming a (fresh) domain function.
 pub struct LogEvent {
     pub expression: Expression,
+    pub position: Position,
 }
 
 #[display(fmt = "assume {}", expression)]
@@ -104,5 +113,15 @@ pub struct Conditional {
     pub guard: Expression,
     pub then_branch: Vec<Statement>,
     pub else_branch: Vec<Statement>,
+    pub position: Position,
+}
+
+#[display(fmt = "materialize_predicate({}, {})", predicate, check_that_exists)]
+pub struct MaterializePredicate {
+    pub predicate: Expression,
+    /// Whether we should check that the predicate  chunk actually exists.
+    /// `materialize_predicate!` corresponds to `true` and `quantified_predicate!`
+    /// corresponds to `false`.
+    pub check_that_exists: bool,
     pub position: Position,
 }

@@ -48,9 +48,8 @@ pub fn process_verification_request<'v, 't: 'v>(
     let build_or_dump_viper_program = || {
         let mut stopwatch = Stopwatch::start("prusti-server", "construction of JVM objects");
         let ast_factory = verification_context.new_ast_factory();
-        let viper_program = request
-            .program
-            .to_viper(prusti_common::vir::LoweringContext::default(), &ast_factory);
+        let mut context = prusti_common::vir::LoweringContext::default();
+        let viper_program = request.program.to_viper(&mut context, &ast_factory);
 
         if config::dump_viper_program() {
             stopwatch.start_next("dumping viper program");
@@ -105,7 +104,7 @@ pub fn process_verification_request<'v, 't: 'v>(
     let mut backend = match request.backend_config.backend {
         VerificationBackend::Carbon | VerificationBackend::Silicon => Backend::Viper(
             new_viper_verifier(
-                request.program.get_name(),
+                &request.program.get_name_with_check_mode(),
                 verification_context,
                 request.backend_config,
             ),
@@ -168,18 +167,26 @@ fn new_viper_verifier<'v, 't: 'v>(
                     //"--printTranslatedProgram".to_string(),
                 ])
             }
-            VerificationBackend::Carbon => verifier_args.extend(vec![
-                "--boogieOpt".to_string(),
-                format!("/logPrefix {log_dir_str}"),
-                //"--print".to_string(), "./log/boogie_program/program.bpl".to_string(),
-            ]),
+            VerificationBackend::Carbon => {
+                let mut found_boogie_opt = false;
+                for arg in &mut verifier_args {
+                    if arg.starts_with("--boogieOpt") {
+                        arg.push_str(&format!(" /logPrefix:{log_dir_str}"));
+                        found_boogie_opt = true;
+                    }
+                }
+                if !found_boogie_opt {
+                    verifier_args.extend(vec![
+                        "--boogieOpt".to_string(),
+                        format!("/logPrefix {log_dir_str}"),
+                        //"--print".to_string(), "./log/boogie_program/program.bpl".to_string(),
+                    ])
+                }
+            },
             VerificationBackend::Lithium => unreachable!("Lithium is not a Viper backend"),
         }
     } else {
         report_path = None;
-        if backend_config.backend == VerificationBackend::Silicon {
-            verifier_args.extend(vec!["--disableTempDirectory".to_string()]);
-        }
     }
     let (smt_solver, smt_manager) = if config::use_smt_wrapper() {
         std::env::set_var("PRUSTI_ORIGINAL_SMT_SOLVER_PATH", config::smt_solver_path());
