@@ -56,14 +56,15 @@ impl Verifier {
             );
         );
 
-        run_timed!(format!("SMT verification with {}", if is_z3 {"Z3"} else {"CVC5"}), debug,
+        let solver_name = if is_z3 { "Z3" } else { "CVC5" };
+        run_timed!(format!("SMT verification with {}", solver_name), debug,
             let result: Result<String, Box<dyn Error>> = try {
                 let mut command = Command::new(self.smt_solver_exe.clone());
 
                 if is_z3 {
                     command.args(&["-smt2", "-in"]);
                 } else {
-                    command.args(&["--incremental"]);
+                    command.args(&["--incremental", "--lang", "smt2"]);
                 }
 
                 let mut child = command.stdin(Stdio::piped())
@@ -100,7 +101,7 @@ impl Verifier {
                 Some("0".to_string()),
                 Some("0".to_string()),
                 Some("0".to_string()),
-                format!("Z3 failed with error: {}", err),
+                format!("{} failed with error: {}", solver_name, err),
                 None,
             ));
 

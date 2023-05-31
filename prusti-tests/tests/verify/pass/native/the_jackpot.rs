@@ -222,7 +222,7 @@ fn the_jackpot(seq: &VecWrapperI32) -> i32 {
         answer = max(answer, dp.lookup(idx));
         idx += 1;
     }
-    assert!(answer == solve_rec(seq, seq.len() - 1));
+    assert!(answer == solve_rec(seq, len - 1)); // TODO: old-expressions with len()
     max(0, answer)
 }
 
